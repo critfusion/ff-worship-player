@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Freedom Fellowship — Worship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: dark; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,14 +17,22 @@
   /* ---------- logo card ---------- */
   #logoCard {
     position: fixed; inset: 0; z-index: 4; display: none;
-    place-content: center; justify-items: center; gap: 5vh; background: #000;
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    padding-top: 6vh; gap: 3.4vh; background: #000;
   }
-  #logoCard.show { display: grid; }
-  #logoCard svg.mark { width: 26vh; height: 26vh; }
-  #logoCard .rule { width: min(44vw, 680px); height: 1px; background: rgba(255,255,255,.22); }
-  #logoCard .wordmark {
-    color: #fff; font: 700 clamp(20px, 3.2vw, 58px)/1.25 "Segoe UI", system-ui, sans-serif;
-    letter-spacing: .3em; text-indent: .3em; text-align: center;
+  #logoCard.show { display: flex; }
+  #logoCard svg.mark { width: 52vh; height: 52vh; flex: none; }
+  #logoCard .lines { text-align: center; }
+  #logoCard .title {
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+    font-weight: 700; font-size: clamp(26px, 4.6vw, 88px); line-height: 1.08;
+    color: #fff; letter-spacing: .005em;
+  }
+  #logoCard .subtitle {
+    margin-top: 1.6vh;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 600; font-size: clamp(14px, 2.1vw, 40px);
+    color: #c9d2dc; letter-spacing: .34em; text-indent: .34em; text-transform: uppercase;
   }
 
   #hud {
@@ -72,8 +83,10 @@
     <rect x="13" y="40" width="18" height="45" fill="#fff"/>
     <rect x="37" y="40" width="18" height="16" fill="#fff"/>
   </svg>
-  <div class="rule"></div>
-  <div class="wordmark">FREEDOM FELLOWSHIP</div>
+  <div class="lines">
+    <div class="title">Youth Fall Retreat 2026</div>
+    <div class="subtitle">White Pine &bull; Greeneville</div>
+  </div>
 </div>
 
 <div id="hud"></div>
