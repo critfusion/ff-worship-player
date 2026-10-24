@@ -192,7 +192,11 @@ function mount(i) {
   if (item.type === "logo") {
     logoCard.classList.add("show");
     setPauseUi(false);
-    showHud(index);
+    /* the card says everything - keep the operator HUD off the screen */
+    hud.classList.remove("show");
+    controls.classList.add("show");
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { hud.classList.remove("show"); controls.classList.remove("show"); }, 5000);
     return;
   }
 
