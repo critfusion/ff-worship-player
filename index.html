@@ -170,6 +170,13 @@ function watchEnd() {
   clearInterval(ticker);
   ticker = setInterval(() => {
     if (!player || !player.getDuration) return;
+    /* keep captions down even if YouTube re-enables them mid-video */
+    if (player.getOption) {
+      try {
+        const tr = player.getOption("captions", "track");
+        if (tr && tr.languageCode) killCaptions(player);
+      } catch (_) {}
+    }
     const d = player.getDuration(), t = player.getCurrentTime();
     if (d > 0 && t > 0 && d - t <= 2) { clearInterval(ticker); next(); }
   }, 500);
