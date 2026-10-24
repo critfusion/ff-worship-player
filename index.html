@@ -3,13 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>2026 Fall Retreat — Worship</title>
+<title>Freedom Fellowship — Worship</title>
 <style>
   :root { color-scheme: dark; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: #000; overflow: hidden; }
   #stage { position: fixed; inset: 0; }
   iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* ---------- logo card ---------- */
+  #logoCard {
+    position: fixed; inset: 0; z-index: 4; display: none;
+    place-content: center; justify-items: center; gap: 5vh; background: #000;
+  }
+  #logoCard.show { display: grid; }
+  #logoCard svg.mark { width: 26vh; height: 26vh; }
+  #logoCard .rule { width: min(44vw, 680px); height: 1px; background: rgba(255,255,255,.22); }
+  #logoCard .wordmark {
+    color: #fff; font: 700 clamp(20px, 3.2vw, 58px)/1.25 "Segoe UI", system-ui, sans-serif;
+    letter-spacing: .3em; text-indent: .3em; text-align: center;
+  }
 
   #hud {
     position: fixed; left: 4vw; bottom: 12vh; z-index: 5;
@@ -18,7 +31,7 @@
     opacity: 0; transition: opacity .5s ease; pointer-events: none;
   }
   #hud.show { opacity: .88; }
-  #hud small { display: block; font-weight: 400; font-size: .62em; opacity: .7; margin-top: .35em; }
+  #hud small { display: block; font-weight: 400; font-size: .62em; opacity: .7; margin-top: .35em; letter-spacing: .08em; text-transform: uppercase; }
 
   #controls {
     position: fixed; left: 50%; bottom: 3.2vh; transform: translateX(-50%);
@@ -51,6 +64,18 @@
 </head>
 <body>
 <div id="stage"></div>
+
+<div id="logoCard">
+  <svg class="mark" viewBox="0 0 100 100" aria-label="Freedom Fellowship">
+    <rect width="100" height="100" rx="14" fill="#3E9CF7"/>
+    <rect x="13" y="17" width="74" height="17" fill="#fff"/>
+    <rect x="13" y="40" width="18" height="45" fill="#fff"/>
+    <rect x="37" y="40" width="18" height="16" fill="#fff"/>
+  </svg>
+  <div class="rule"></div>
+  <div class="wordmark">FREEDOM FELLOWSHIP</div>
+</div>
+
 <div id="hud"></div>
 
 <div id="controls">
@@ -58,7 +83,7 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
     Start over
   </button>
-  <button id="b-prev" title="Previous song (left arrow)">
+  <button id="b-prev" title="Previous (left arrow)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h2.2v14H7zm11 0v14l-9.2-7z"/></svg>
     Previous
   </button>
@@ -67,7 +92,7 @@
     <svg id="i-play" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M7 4.5v15l13-7.5z"/></svg>
     <span id="t-pause">Pause</span>
   </button>
-  <button id="b-next" title="Next song (right arrow)">
+  <button id="b-next" title="Next (right arrow)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 5H17v14h-2.2zM6 5l9.2 7L6 19z"/></svg>
     Next
   </button>
@@ -75,7 +100,7 @@
 
 <div id="start">
   <div>
-    <h1>2026 Fall Retreat</h1>
+    <h1>Freedom Fellowship</h1>
     <div>Worship — Psalm 51</div>
     <div class="k">Click anywhere to begin · Space pause · ← → skip · R restart · F fullscreen</div>
   </div>
@@ -83,17 +108,32 @@
 <div id="err"></div>
 
 <script>
-const VIDEOS = [
-  { id: "KjOa0TQSQaQ", title: "Instrumental — gather",          note: "1:17" },
-  { id: "skAdCyew2B8", title: "Lord I Need You",                note: "Matt Maher" },
-  { id: "0Vf6KN4vqwU", title: "Hold On",                        note: "Katy Nichole" },
-  { id: "xhYboRutSGY", title: "Scandal of Grace",               note: "Hillsong UNITED" },
-  { id: "Rv55qS7v2-c", title: "Give Us Clean Hands",            note: "Chris Tomlin — closing" }
+/* ---------------------------------------------------------------
+   ORDER
+   Worship set (1-5) → logo card → altar call songs, which loop
+   forever so music keeps playing during the invitation.
+   --------------------------------------------------------------- */
+const ITEMS = [
+  { type: "video", id: "KjOa0TQSQaQ", title: "Instrumental — gather", note: "1:17",               section: "Worship" },
+  { type: "video", id: "skAdCyew2B8", title: "Lord I Need You",       note: "Matt Maher",         section: "Worship" },
+  { type: "video", id: "0Vf6KN4vqwU", title: "Hold On",               note: "Katy Nichole",       section: "Worship" },
+  { type: "video", id: "xhYboRutSGY", title: "Scandal of Grace",      note: "Hillsong UNITED",    section: "Worship" },
+  { type: "video", id: "Rv55qS7v2-c", title: "Give Us Clean Hands",   note: "Chris Tomlin",       section: "Worship" },
+  { type: "logo" },
+  { type: "video", id: "rrVPo6dO2e8", title: "In the Room",           note: "Forrest Frank",      section: "Altar call" },
+  { type: "video", id: "3zARVp3420I", title: "Holy Spirit",           note: "Francesca Battistelli", section: "Altar call" },
+  { type: "video", id: "h8BRfDMMGJ4", title: "Tremble",               note: "Mosaic MSC",         section: "Altar call" },
+  { type: "video", id: "IvSuGyJQ6oM", title: "Goodness of God",       note: "Bethel Music",       section: "Altar call" },
+  { type: "video", id: "ifFovH-dhHw", title: "Living Hope",           note: "Phil Wickham",       section: "Altar call" }
 ];
+
+const ALTAR_START = ITEMS.findIndex(i => i.section === "Altar call");
+const ALTAR_END   = ITEMS.length - 1;
 
 const stage = document.getElementById("stage");
 const hud = document.getElementById("hud");
 const controls = document.getElementById("controls");
+const logoCard = document.getElementById("logoCard");
 const startScreen = document.getElementById("start");
 const errBox = document.getElementById("err");
 
@@ -114,8 +154,12 @@ function wake(ms = 4000) {
   document.addEventListener(ev, () => wake(), { passive: true }));
 
 function showHud(i) {
-  const v = VIDEOS[i];
-  hud.innerHTML = `${i + 1}/${VIDEOS.length} &nbsp; ${v.title}<small>${v.note}</small>`;
+  const item = ITEMS[i];
+  if (item.type === "logo") {
+    hud.innerHTML = "Freedom Fellowship<small>Press Next to begin the altar call</small>";
+  } else {
+    hud.innerHTML = `${item.title}<small>${item.note} · ${item.section}</small>`;
+  }
   wake(5000);
 }
 
@@ -130,19 +174,38 @@ function loadYtApi() {
   });
 }
 
-function mount(i, autoplay = true) {
-  index = (i + VIDEOS.length) % VIDEOS.length;
-  errBox.textContent = "";
+function clearStage() {
+  clearInterval(ticker);
+  ticker = null;
+  if (player && player.destroy) { try { player.destroy(); } catch (_) {} }
+  player = null;
+  window.__player = null;
   stage.innerHTML = "";
+}
+
+function mount(i) {
+  index = Math.max(0, Math.min(ITEMS.length - 1, i));
+  const item = ITEMS[index];
+  errBox.textContent = "";
+  clearStage();
+
+  if (item.type === "logo") {
+    logoCard.classList.add("show");
+    setPauseUi(false);
+    showHud(index);
+    return;
+  }
+
+  logoCard.classList.remove("show");
   const frame = document.createElement("div");
   frame.id = "yt" + Date.now();
   stage.appendChild(frame);
   showHud(index);
 
   player = window.__player = new YT.Player(frame.id, {
-    videoId: VIDEOS[index].id,
+    videoId: item.id,
     playerVars: {
-      autoplay: autoplay ? 1 : 0, mute: autoplay ? 1 : 0,
+      autoplay: 1, mute: 1,
       controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3,
       disablekb: 1, fs: 1, playsinline: 1, cc_load_policy: 0
     },
@@ -160,7 +223,7 @@ function mount(i, autoplay = true) {
         setPauseUi(e.data === YT.PlayerState.PLAYING);
         if (e.data === YT.PlayerState.ENDED) next();
       },
-      onError: e => { errBox.textContent = "Video " + VIDEOS[index].id + " error " + e.data; next(); }
+      onError: e => { errBox.textContent = "Video " + item.id + " error " + e.data; next(); }
     }
   });
 }
@@ -182,8 +245,15 @@ function watchEnd() {
   }, 500);
 }
 
-function next() { clearInterval(ticker); mount(index + 1); wake(); }
-function prev() { clearInterval(ticker); mount(index - 1); wake(); }
+/* ---------- navigation with the altar-call loop ---------- */
+function next() {
+  if (index === ALTAR_END) { mount(ALTAR_START); return; }   /* loop the altar set */
+  mount(index + 1);
+}
+function prev() {
+  if (index === 0) return;
+  mount(index - 1);
+}
 function restart() {
   if (!player || !player.seekTo) return;
   player.seekTo(0, true);
@@ -191,11 +261,19 @@ function restart() {
   wake(3000);
   showHud(index);
 }
-
 function togglePlay() {
   if (!player || !player.getPlayerState) return;
   player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
   wake(3000);
+}
+function setPauseUi(playing) {
+  const t = document.getElementById("t-pause");
+  const ip = document.getElementById("i-pause");
+  const il = document.getElementById("i-play");
+  if (!t) return;
+  t.textContent = playing ? "Pause" : "Play";
+  ip.style.display = playing ? "" : "none";
+  il.style.display = playing ? "none" : "";
 }
 
 /* Captions turn themselves back on when the viewer's YouTube account has them
@@ -206,16 +284,6 @@ function killCaptions(p) {
   try { p.unloadModule("cc"); } catch (_) {}
   try { p.setOption("captions", "track", {}); } catch (_) {}
   try { p.setOption("cc", "track", {}); } catch (_) {}
-}
-
-function setPauseUi(playing) {
-  const t = document.getElementById("t-pause");
-  const ip = document.getElementById("i-pause");
-  const il = document.getElementById("i-play");
-  if (!t) return;
-  t.textContent = playing ? "Pause" : "Play";
-  ip.style.display = playing ? "" : "none";
-  il.style.display = playing ? "none" : "";
 }
 
 /* ---------- buttons ---------- */
