@@ -85,9 +85,9 @@
 <script>
 const VIDEOS = [
   { id: "KjOa0TQSQaQ", title: "Instrumental — gather",          note: "1:17" },
-  { id: "Rv55qS7v2-c", title: "Give Us Clean Hands",            note: "Chris Tomlin" },
   { id: "0Vf6KN4vqwU", title: "Hold On",                        note: "Katy Nichole" },
   { id: "Vcps8EQUOt4", title: "Mercy",                          note: "Matt Redman" },
+  { id: "Rv55qS7v2-c", title: "Give Us Clean Hands",            note: "Chris Tomlin — closing" },
   { id: "skAdCyew2B8", title: "Lord I Need You",                note: "backup — Matt Maher" }
 ];
 
@@ -144,17 +144,19 @@ function mount(i, autoplay = true) {
     playerVars: {
       autoplay: autoplay ? 1 : 0, mute: autoplay ? 1 : 0,
       controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3,
-      disablekb: 1, fs: 1, playsinline: 1
+      disablekb: 1, fs: 1, playsinline: 1, cc_load_policy: 0
     },
     events: {
       onReady: e => {
         e.target.playVideo();
+        killCaptions(e.target);
         /* browsers only allow muted autoplay; the click on the start screen
            is what lets us turn sound back on a moment later */
         setTimeout(() => { try { e.target.unMute(); e.target.setVolume(100); } catch (_) {} }, 900);
         watchEnd();
       },
       onStateChange: e => {
+        killCaptions(e.target);
         setPauseUi(e.data === YT.PlayerState.PLAYING);
         if (e.data === YT.PlayerState.ENDED) next();
       },
@@ -187,6 +189,16 @@ function togglePlay() {
   if (!player || !player.getPlayerState) return;
   player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
   wake(3000);
+}
+
+/* Captions turn themselves back on when the viewer's YouTube account has them
+   enabled, so strip the caption module every time a video starts. */
+function killCaptions(p) {
+  if (!p || !p.unloadModule) return;
+  try { p.unloadModule("captions"); } catch (_) {}
+  try { p.unloadModule("cc"); } catch (_) {}
+  try { p.setOption("captions", "track", {}); } catch (_) {}
+  try { p.setOption("cc", "track", {}); } catch (_) {}
 }
 
 function setPauseUi(playing) {
