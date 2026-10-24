@@ -142,7 +142,9 @@ let player = null, index = 0, ticker = null, starting = false;
 /* ---------- chrome that fades out when nobody touches the mouse ---------- */
 let hideT = null;
 function wake(ms = 4000) {
-  hud.classList.add("show");
+  const onLogo = ITEMS[index] && ITEMS[index].type === "logo";
+  if (onLogo) hud.classList.remove("show");   /* nothing but the card on screen */
+  else hud.classList.add("show");
   controls.classList.add("show");
   clearTimeout(hideT);
   hideT = setTimeout(() => {
@@ -193,6 +195,7 @@ function mount(i) {
     logoCard.classList.add("show");
     setPauseUi(false);
     /* the card says everything - keep the operator HUD off the screen */
+    hud.innerHTML = "";
     hud.classList.remove("show");
     controls.classList.add("show");
     clearTimeout(hideT);
