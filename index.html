@@ -62,6 +62,11 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h2.2v14H7zm11 0v14l-9.2-7z"/></svg>
     Previous
   </button>
+  <button id="b-pause" title="Play / pause (Space)">
+    <svg id="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zm5 0h3v14h-3z"/></svg>
+    <svg id="i-play" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M7 4.5v15l13-7.5z"/></svg>
+    <span id="t-pause">Pause</span>
+  </button>
   <button id="b-next" title="Next song (right arrow)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 5H17v14h-2.2zM6 5l9.2 7L6 19z"/></svg>
     Next
@@ -82,7 +87,7 @@ const VIDEOS = [
   { id: "KjOa0TQSQaQ", title: "Instrumental — gather",          note: "1:17" },
   { id: "Rv55qS7v2-c", title: "Give Us Clean Hands",            note: "Chris Tomlin" },
   { id: "0Vf6KN4vqwU", title: "Hold On",                        note: "Katy Nichole" },
-  { id: "fiyYoe678yI", title: "Broken Vessels (Amazing Grace)", note: "Hillsong Worship" },
+  { id: "Vcps8EQUOt4", title: "Mercy",                          note: "Matt Redman" },
   { id: "skAdCyew2B8", title: "Lord I Need You",                note: "backup — Matt Maher" }
 ];
 
@@ -149,7 +154,10 @@ function mount(i, autoplay = true) {
         setTimeout(() => { try { e.target.unMute(); e.target.setVolume(100); } catch (_) {} }, 900);
         watchEnd();
       },
-      onStateChange: e => { if (e.data === YT.PlayerState.ENDED) next(); },
+      onStateChange: e => {
+        setPauseUi(e.data === YT.PlayerState.PLAYING);
+        if (e.data === YT.PlayerState.ENDED) next();
+      },
       onError: e => { errBox.textContent = "Video " + VIDEOS[index].id + " error " + e.data; next(); }
     }
   });
@@ -175,8 +183,24 @@ function restart() {
   showHud(index);
 }
 
+function togglePlay() {
+  if (!player || !player.getPlayerState) return;
+  player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+  wake(3000);
+}
+
+function setPauseUi(playing) {
+  const t = document.getElementById("t-pause");
+  const ip = document.getElementById("i-pause");
+  const il = document.getElementById("i-play");
+  if (!t) return;
+  t.textContent = playing ? "Pause" : "Play";
+  ip.style.display = playing ? "" : "none";
+  il.style.display = playing ? "none" : "";
+}
+
 /* ---------- buttons ---------- */
-[["b-restart", restart], ["b-prev", prev], ["b-next", next]].forEach(([id, fn]) => {
+[["b-restart", restart], ["b-prev", prev], ["b-pause", togglePlay], ["b-next", next]].forEach(([id, fn]) => {
   document.getElementById(id).addEventListener("click", e => {
     e.stopPropagation();
     fn();
@@ -207,8 +231,7 @@ document.addEventListener("keydown", e => {
   if (!starting) { begin(); return; }
   if (e.code === "Space") {
     e.preventDefault();
-    if (!player) return;
-    player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
+    togglePlay();
   }
   if (e.code === "ArrowRight") { e.preventDefault(); next(); }
   if (e.code === "ArrowLeft") { e.preventDefault(); prev(); }
