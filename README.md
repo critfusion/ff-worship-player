@@ -24,7 +24,7 @@ YouTube blocks embeds on `file:` pages, so serve the folder:
 - macOS or Linux: `./run-player-mac-linux.sh` (needs `python3`)
 - Windows: `run-player-windows.bat` (needs Python)
 
-Both start `http.server` on port 8099 and open `http://localhost:8099/`. Close the terminal window or press Ctrl+C when done.
+Both start `http.server` on port 8099 and open `http://localhost:8099/`. On macOS or Linux, close the terminal window or press Ctrl+C when done. On Windows, close the separate minimized `worship-player` window to stop the server.
 
 ## Change the playlist
 Edit the `ITEMS` array in `index.html`. Each entry has a YouTube video id, title, note and section.
