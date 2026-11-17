@@ -85,16 +85,18 @@
 <script>
 /* ---------------------------------------------------------------
    ORDER
-   The Tuesday Youth Worship set opens the player. The instrumental
-   intro follows it and plays once; the whole list then loops back to
-   the top, skipping the intro on every later pass.
+   The hour of water opens the player for prayer before the service.
+   Then the Tuesday Youth Worship set, then the gather video, then the
+   rest. The water and the gather video play once per session; the
+   songs loop back to the top.
    --------------------------------------------------------------- */
 const ITEMS = [
-  { type: "video", id: "RZeJTtUrhwA", title: "Here I Am to Worship",   note: "Hillsong Worship",     section: "Youth Worship" },
-  { type: "video", id: "HSedYlGfBV8", title: "demons",                 note: "Josiah Queen",         section: "Youth Worship" },
+  { type: "video", id: "Jk88_BaEi00", title: "Still Water — pre-service", note: "60 min",            section: "Pre-Service", once: true },
+  { type: "video", id: "q6-FalGV_l4", title: "Here I Am to Worship",   note: "Chris Tomlin",         section: "Youth Worship" },
+  { type: "video", id: "DB7_4iwlxxc", title: "demons",                 note: "Josiah Queen",         section: "Youth Worship" },
   { type: "video", id: "zhmwQwXCK0o", title: "Lord I Need You",        note: "Matt Maher",           section: "Youth Worship" },
   { type: "video", id: "-f4MUUMWMV4", title: "Goodness of God",        note: "Bethel Music",         section: "Youth Worship" },
-  { type: "video", id: "C1wFmXGPbUg", title: "Instrumental — gather",  note: "1:03",                 section: "Intro" },
+  { type: "video", id: "C1wFmXGPbUg", title: "Instrumental — gather",  note: "1:03",                 section: "Intro", once: true },
   { type: "video", id: "xhYboRutSGY", title: "Scandal of Grace",       note: "Hillsong UNITED",      section: "Worship" },
   { type: "video", id: "Rv55qS7v2-c", title: "Give Us Clean Hands",    note: "Chris Tomlin",         section: "Worship" },
   { type: "video", id: "rrVPo6dO2e8", title: "In the Room",            note: "Forrest Frank",        section: "Worship" },
@@ -107,10 +109,9 @@ const ITEMS = [
   { type: "video", id: "0_q3xdddl0E", title: "Your Grace Is Enough",   note: "Chris Tomlin",         section: "Worship" }
 ];
 
-const LOOP_START  = 0;                   /* the loop returns to the first youth song */
+const LOOP_START  = 0;                   /* the loop returns to the first song */
 const LOOP_END    = ITEMS.length - 1;
-const INTRO_INDEX = ITEMS.findIndex(i => i.section === "Intro");
-let introDone = false;                   /* the gather video plays once per session */
+const playedOnce  = new Set();           /* pre-service block and gather video play once per session */
 
 const stage = document.getElementById("stage");
 const hud = document.getElementById("hud");
@@ -163,7 +164,7 @@ function clearStage() {
 function mount(i) {
   index = Math.max(0, Math.min(ITEMS.length - 1, i));
   const item = ITEMS[index];
-  if (index === INTRO_INDEX) introDone = true;   /* it only plays once per session */
+  if (item.once) playedOnce.add(index);   /* pre-service block and gather video run once per session */
   errBox.textContent = "";
   clearStage();
 
@@ -215,11 +216,11 @@ function watchEnd() {
   }, 500);
 }
 
-/* ---------- navigation: songs loop, intro plays once ---------- */
+/* ---------- navigation: songs loop, pre-service block plays once ---------- */
 function next() {
   if (index >= LOOP_END) { mount(LOOP_START); return; }   /* wrap back to the first song */
   let n = index + 1;
-  if (n === INTRO_INDEX && introDone) n += 1;             /* skip the gather video after its one play */
+  while (n < ITEMS.length && ITEMS[n].once && playedOnce.has(n)) n++;   /* skip anything already shown */
   mount(Math.min(n, LOOP_END));
 }
 function prev() {
