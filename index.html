@@ -109,7 +109,7 @@ const ITEMS = [
   { type: "video", id: "0_q3xdddl0E", title: "Your Grace Is Enough",   note: "Chris Tomlin",         section: "Worship" }
 ];
 
-const LOOP_START  = 0;                   /* the loop returns to the first song */
+const LOOP_START  = ITEMS.findIndex(i => !i.once);   /* the loop returns to the first song, not the water */
 const LOOP_END    = ITEMS.length - 1;
 const playedOnce  = new Set();           /* pre-service block and gather video play once per session */
 
